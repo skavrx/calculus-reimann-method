@@ -200,50 +200,95 @@ public class Area {
 		}
 	}
 
+	/**
+	 * @return The default type for the instance
+	 */
 	public Type getType() {
 		return type;
 	}
 
+	/**
+	 * @param type The default type to be set for the instance
+	 */
 	public void setType(Type type) {
 		this.type = type;
 	}
 
+	/**
+	 * @return gets the number rectangles
+	 */
 	public int getRect() {
 		return rect;
 	}
 
+	/**
+	 * 
+	 * @param rect sets the number of rectangles for the area
+	 */
 	public void setRect(int rect) {
 		this.rect = rect;
 	}
 
+	/**
+	 * 
+	 * @return get the upper set bound
+	 */
 	public double getUpper() {
 		return upper;
 	}
 
+	/**
+	 * 
+	 * @param upper set the upper bound
+	 */
 	public void setUpper(double upper) {
 		this.upper = upper;
 	}
 
+	/**
+	 * 
+	 * @return get the lower bound
+	 */
 	public double getLower() {
 		return lower;
 	}
 
+	/**
+	 * 
+	 * @param lower set the lower bound
+	 */
 	public void setLower(double lower) {
 		this.lower = lower;
 	}
 
+	/**
+	 * 
+	 * @return get the string of the set function
+	 */
 	public String getFunction() {
 		return function;
 	}
 
+	/**
+	 * 
+	 * @param function the function string to be set. x must be the variable.
+	 * @return this instance
+	 */
 	public Area setFunction(String function) {
 		this.function = function;
 		return this;
 	}
 
+	/**
+	 * The map of the left handed methods points that will be mapped.
+	 */
 	private Map<Double, Double> dataSetLeft;
 
-	public double getLeftArea() {
+	/**
+	 * Sets the {@code dataSetLeft} and adds the values to it using the midpoint
+	 * method
+	 */
+	private double getLeftArea() {
 		double domain = upper - lower; // Getting the domain by subtracting the upper bound by the lower bound.
 		double delta = domain / rect; // The distance between the rectangles determined by dividing the domain by
 										// the number of rectangles
@@ -276,9 +321,16 @@ public class Area {
 		return area;
 	}
 
+	/**
+	 * The map of the right handed methods points that will be mapped.
+	 */
 	private Map<Double, Double> dataSetRight;
 
-	public double getRightArea() {
+	/**
+	 * Sets the {@code dataSetRight} and adds the values to it using the midpoint
+	 * method
+	 */
+	private double getRightArea() {
 		double domain = upper - lower; // Getting the domain by subtracting the upper bound by the lower bound.
 		double delta = domain / rect; // The distance between the rectangles determined by dividing the domain by
 										// the number of rectangles
@@ -304,9 +356,16 @@ public class Area {
 		return area;
 	}
 
+	/**
+	 * The map of the midpoint methods points that will be mapped.
+	 */
 	private Map<Double, Double> dataSetMidpoint;
 
-	public double getMidpointArea() {
+	/**
+	 * Sets the {@code dataSetMidpoint} and adds the values to it using the midpoint
+	 * method
+	 */
+	private double getMidpointArea() {
 
 		double domain = upper - lower; // Getting the domain by subtracting the upper bound by the lower bound.
 		double delta = domain / rect; // The distance between the rectangles determined by dividing the domain by
@@ -333,9 +392,16 @@ public class Area {
 		return area;
 	}
 
+	/**
+	 * The map of the trapezoid methods points that will be mapped.
+	 */
 	private Map<Double, Double> dataSetShape;
 
-	public double getShapeArea() {
+	/**
+	 * Sets the {@code dataSetShape} and adds the values to it using the trapezoid
+	 * method
+	 */
+	private double getShapeArea() {
 		double domain = upper - lower; // Getting the domain by subtracting the upper bound by the lower bound.
 		double delta = domain / rect; // The distance between the rectangles determined by dividing the domain by
 										// the number of rectangles
@@ -362,8 +428,15 @@ public class Area {
 		return area;
 	}
 
+	/**
+	 * The map of the functions points that will be mapped.
+	 */
 	private Map<Double, Double> dataSetFunction;
 
+	/**
+	 * Sets the {@code dataSetFunction} and adds the values to it using the function
+	 * delta and function
+	 */
 	private void getFunctionData() {
 
 		dataSetFunction = new HashMap<Double, Double>();
@@ -377,10 +450,18 @@ public class Area {
 		}
 	}
 
+	/**
+	 * 
+	 * @param delta sets the functions delta
+	 */
 	public void setFuncDelta(double delta) {
 		this.funcDelta = delta;
 	}
 
+	/**
+	 * 
+	 * @return gets the functions delta for graphing
+	 */
 	public double getFuncDelta() {
 		return funcDelta;
 	}
@@ -394,7 +475,7 @@ public class Area {
 	 *                 function
 	 * @return the evaluated value of the function with variable x
 	 */
-	public double eval(String function, double x) {
+	private double eval(String function, double x) {
 		Expression e = new ExpressionBuilder(function).variables("x").build().setVariable("x", x);
 		return e.evaluate();
 	}
