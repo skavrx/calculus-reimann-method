@@ -165,6 +165,9 @@ public class Area {
 		}
 	}
 
+	/**
+	 * Called to prevent any data overlap
+	 */
 	public void resetDataSets() {
 		dataSetRight = null;
 		dataSetLeft = null;

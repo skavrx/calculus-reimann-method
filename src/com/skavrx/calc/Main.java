@@ -5,6 +5,8 @@ import java.io.IOException;
 import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
 import java.util.Map.Entry;
 import java.util.Optional;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -15,6 +17,8 @@ import com.skavrx.calc.Area.Type;
 import com.sun.javafx.charts.Legend;
 
 import javafx.application.Application;
+import javafx.beans.property.ReadOnlyDoubleWrapper;
+import javafx.beans.property.ReadOnlyStringWrapper;
 import javafx.embed.swing.SwingFXUtils;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
@@ -37,6 +41,8 @@ import javafx.scene.control.Label;
 import javafx.scene.control.Menu;
 import javafx.scene.control.MenuBar;
 import javafx.scene.control.MenuItem;
+import javafx.scene.control.TableColumn;
+import javafx.scene.control.TableView;
 import javafx.scene.control.TextArea;
 import javafx.scene.control.TextField;
 import javafx.scene.control.ToggleButton;
@@ -61,6 +67,9 @@ public class Main extends Application {
 	private NumberAxis xAxis;
 	private NumberAxis yAxis;
 	private LineChart<Number, Number> ac;
+	
+	private TableView table = new TableView();
+	private List<Double> xValues, fxValues;
 
 	@Override
 	public void start(Stage primaryStage) {
@@ -71,6 +80,9 @@ public class Main extends Application {
 	private void initUI(Stage primaryStage) {
 
 		try {
+			xValues = Arrays.asList(0.0);
+			fxValues = Arrays.asList(0.0);
+			
 			area = new Area(Area.Type.DEFAULT, "x^3", -5, 5, 10);
 			xAxis = new NumberAxis();
 			yAxis = new NumberAxis();
@@ -142,6 +154,15 @@ public class Main extends Application {
 					}
 				}
 			};
+			root = new BorderPane();
+
+			Label lbl = new Label("Area");
+			lbl.setAlignment(Pos.BASELINE_CENTER);
+			lbl.setPrefHeight(SIZE);
+			
+			lbl.prefWidthProperty().bind(root.widthProperty());
+			lbl.setStyle("-fx-border-style: dotted; -fx-border-width: 1 0 0 0;"
+					+ "-fx-border-color: gray; -fx-font-weight: bold; -fx-font: 24 arial;");
 
 			// add event
 			m1.setOnAction(event);
@@ -157,11 +178,33 @@ public class Main extends Application {
 			MenuBar menuBar = new MenuBar();
 			menuBar.getMenus().addAll(menu1, menu2, menu3);
 
-			root = new BorderPane();
 
+		    table.setEditable(false);
+		    table.setPrefWidth(primaryStage.getMinWidth() * 0.15);
+		    
+		    TableColumn<Integer, Double> xTable = new TableColumn<>("x");
+	        TableColumn<Integer, Double> fxTable = new TableColumn<>("f(x)");
+	        
+	        xTable.setEditable(false);
+	        fxTable.setEditable(false);
+
+	        for (int i = 0; i < xValues.size() && i < fxValues.size(); i++) {
+	            table.getItems().add(i);
+	        }
+	        
+	        xTable.prefWidthProperty().bind(table.widthProperty().multiply(0.5));
+	        fxTable.prefWidthProperty().bind(table.widthProperty().multiply(0.5));
+
+	        xTable.setResizable(false);
+	        fxTable.setResizable(false);
+	        
+	        table.getColumns().addAll(xTable, fxTable);
+	        
+	        area.getDataSet();
+	        
 			root.setTop(menuBar);
-			root.setBottom(getBottomLabel());
-			//root.setLeft(getLeftLabel());
+			root.setBottom(lbl);
+			//root.setLeft(table);
 			//root.setRight(getRightLabel());
 
 			VBox info = new VBox(5);
@@ -236,9 +279,6 @@ public class Main extends Application {
 			buttonBoxUpperBound.getChildren().addAll(upperBoundLabel, upperBoundField, upperBoundButton);
 			buttonBoxRectangles.getChildren().addAll(rectangleLabel, rectangleField, rectangleButton);
 
-			Label areaTotal = new Label("Area: " + area.getArea(Type.SHAPE));
-			areaInfo.getChildren().addAll(areaTotal);
-
 			Label selectedMethod = new Label("Selected Method: " + area.getType().toString());
 			areaInfo.getChildren().addAll(selectedMethod);
 
@@ -246,7 +286,7 @@ public class Main extends Application {
 			updateBox.getChildren().addAll(setAllButton);
 			
 			info.getChildren().addAll(buttonbox, buttonBoxFunction, buttonBoxLowerBound, buttonBoxUpperBound,
-					buttonBoxRectangles, updateBox, areaInfo);
+					buttonBoxRectangles, updateBox);
 			root.setRight(info);
 			root.setCenter(ac);
 
@@ -272,7 +312,7 @@ public class Main extends Application {
 						
 						selectedMethod.setText("Selected Method: " + area.getType().toString());
 						updateLineChart();
-						areaTotal.setText("Area: " + area.getArea());
+						lbl.setText("Area: " + area.getArea());
 
 					} catch (Exception e2) {
 						new Alert(AlertType.ERROR, "Error with function!").showAndWait();
@@ -290,7 +330,7 @@ public class Main extends Application {
 					area.resetDataSets();
 					try {
 						area.setFunction(functionField.getText());
-						areaTotal.setText("Area: " + area.getArea());
+						lbl.setText("Area: " + area.getArea());
 						updateLineChart();
 					} catch (Exception e2) {
 						new Alert(AlertType.ERROR, "Error with function!").showAndWait();
@@ -306,7 +346,7 @@ public class Main extends Application {
 					area.resetDataSets();
 					try {
 						area.setLower(Double.valueOf(lowerBoundField.getText()));
-						areaTotal.setText("Area: " + area.getArea());
+						lbl.setText("Area: " + area.getArea());
 						updateLineChart();
 					} catch (Exception e2) {
 						new Alert(AlertType.ERROR, "Must be a number!").showAndWait();
@@ -322,7 +362,7 @@ public class Main extends Application {
 					area.resetDataSets();
 					try {
 						area.setUpper(Double.valueOf(upperBoundField.getText()));
-						areaTotal.setText("Area: " + area.getArea());
+						lbl.setText("Area: " + area.getArea());
 						updateLineChart();
 					} catch (Exception e2) {
 						new Alert(AlertType.ERROR, "Must be a number!").showAndWait();
@@ -338,7 +378,7 @@ public class Main extends Application {
 					area.resetDataSets();
 					try {
 						area.setRect(Integer.valueOf(rectangleField.getText()));
-						areaTotal.setText("Area: " + area.getArea());
+						lbl.setText("Area: " + area.getArea());
 						updateLineChart();
 					} catch (Exception e2) {
 						new Alert(AlertType.ERROR, "Must be a integer!").showAndWait();
@@ -420,6 +460,7 @@ public class Main extends Application {
 			for (Entry<Double, Double> x : area.getDataSet(Type.LEFT).entrySet()) {
 				for (Series x2 : drawRectangleToZero(x.getKey(), x.getValue(), x.getKey() + area.getDelta())) {
 					ac.getData().add(x2);
+			        table.getItems().add(x);
 				}
 			}
 
@@ -465,6 +506,11 @@ public class Main extends Application {
 		for (Entry<Double, Double> ne : area.getDataSet(Type.FUNCTION).entrySet())
 			series4.getData().add(new XYChart.Data(ne.getKey(), ne.getValue()));
 
+		XYChart.Series touchup = new XYChart.Series();
+
+		touchup.getData().add(new XYChart.Data(area.getLower(), 0));
+		touchup.getData().add(new XYChart.Data(area.getUpper(), 0));
+		
 		ac.setTitle("THE AREA CALCULATOR");
 
 		ac.getData().addAll(series1, series2, series3, series4, series5);
@@ -516,49 +562,6 @@ public class Main extends Application {
 
 	}
 
-	private Label getBottomLabel() {
-
-		Label lbl = new MyLabel("Bottom");
-		lbl.setPrefHeight(SIZE);
-		lbl.prefWidthProperty().bind(root.widthProperty());
-		lbl.setStyle("-fx-border-style: dotted; -fx-border-width: 1 0 0 0;"
-				+ "-fx-border-color: gray; -fx-font-weight: bold");
-
-		return lbl;
-	}
-
-	private Label getLeftLabel() {
-
-		Label lbl = new MyLabel("Left");
-		lbl.setPrefWidth(SIZE);
-		lbl.prefHeightProperty().bind(root.heightProperty().subtract(2 * SIZE));
-		lbl.setStyle("-fx-border-style: dotted; -fx-border-width: 0 1 0 0;"
-				+ "-fx-border-color: gray; -fx-font-weight: bold");
-
-		return lbl;
-	}
-
-	private Label getRightLabel() {
-
-		Label lbl = new MyLabel("Right");
-		lbl.setPrefWidth(SIZE);
-		lbl.prefHeightProperty().bind(root.heightProperty().subtract(2 * SIZE));
-		lbl.setStyle("-fx-border-style: dotted; -fx-border-width: 0 0 0 1;"
-				+ "-fx-border-color: gray; -fx-font-weight: bold");
-
-		return lbl;
-	}
-
-	private Label getCenterLabel() {
-
-		Label lbl = new MyLabel("Center");
-		lbl.setStyle("-fx-font-weight: bold");
-		lbl.prefHeightProperty().bind(root.heightProperty().subtract(2 * SIZE));
-		lbl.prefWidthProperty().bind(root.widthProperty().subtract(2 * SIZE));
-
-		return lbl;
-	}
-
 	public ArrayList<XYChart.Series> drawTrapezoidToZero(double x, double y, double x2, double y2) {
 		ArrayList<XYChart.Series> lines = new ArrayList<XYChart.Series>();
 
@@ -590,15 +593,6 @@ public class Main extends Application {
 
 	public static void main(String[] args) {
 		launch(args);
-	}
-
-	class MyLabel extends Label {
-
-		public MyLabel(String text) {
-			super(text);
-
-			setAlignment(Pos.BASELINE_CENTER);
-		}
 	}
 
 }
