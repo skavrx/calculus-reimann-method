@@ -313,7 +313,7 @@ public class Area {
 				System.out.println(String.format("Data Point Added: (%.2f, %.2f)", x, eval(function, x)));
 			// add the delta (length) multiplied by the evaluated x value from the given
 			// function (height) which is the area of the rectangle.
-			area += (delta * eval(function, x));
+			area += Math.abs((delta * eval(function, x)));
 			if (DEBUG)
 				rec_num++;
 		}
@@ -349,7 +349,7 @@ public class Area {
 			// function (height) which is the area of the rectangle.
 			dataSetRight.put(x, eval(function, x));
 
-			area += (delta * eval(function, x));
+			area += Math.abs((delta * eval(function, x)));
 			if (DEBUG)
 				rec_num++;
 		}
@@ -380,7 +380,7 @@ public class Area {
 		// subtracts the delta. It stops when x is one above the lower bound
 		for (double x = lower; x <= upper - delta; x += delta) {
 			double midpoint = (x + (x + delta)) / 2;
-			area += (delta * eval(function, midpoint));
+			area += Math.abs((delta * eval(function, midpoint)));
 			dataSetMidpoint.put(midpoint, eval(function, midpoint));
 			if (DEBUG)
 				System.out.println("Rectangle: " + rec_num + " " + "Current: mid: " + midpoint + " y: "
@@ -417,10 +417,10 @@ public class Area {
 			double first = eval(function, x);
 			double second = eval(function, (x + delta));
 			double average = (first + second) / 2;
-			area += (delta * average);
-
+			area += Math.abs((delta * average));
+			dataSetShape.put(x, first);
 			if (DEBUG)
-				System.out.println("Rectangle: " + rec_num + " " + "Current: avg: " + x + "y: " + average);
+				System.out.println("Rectangle: " + rec_num + " " + "Current: avg: " + x + " y: " + average);
 			if (DEBUG)
 				rec_num++;
 		}
@@ -478,6 +478,15 @@ public class Area {
 	private double eval(String function, double x) {
 		Expression e = new ExpressionBuilder(function).variables("x").build().setVariable("x", x);
 		return e.evaluate();
+	}
+	
+	/**
+	 * 
+	 * @param x the x point to evaluate
+	 * @return double, y value of the function
+	 */
+	public double eval(double x) {
+		return eval(function, x);
 	}
 
 	/**
