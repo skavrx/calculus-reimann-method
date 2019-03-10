@@ -10,7 +10,7 @@ import net.objecthunter.exp4j.ExpressionBuilder;
  * Utility class for the area under a function
  * 
  * @see Area()
- * @version 0.1
+ * @version 0.2
  * @author skavrx
  *
  */
@@ -165,6 +165,14 @@ public class Area {
 		}
 	}
 
+	public void resetDataSets() {
+		dataSetRight = null;
+		dataSetLeft = null;
+		dataSetMidpoint = null;
+		dataSetShape = null;
+		dataSetFunction = null;
+	}
+	
 	/**
 	 * Get the area of the Area object with the given type Gets the type that was
 	 * set on instance creation and uses {@code getArea(AreaType area)}
