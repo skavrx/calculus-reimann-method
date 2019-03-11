@@ -17,8 +17,7 @@ import com.skavrx.calc.Area.Type;
 import com.sun.javafx.charts.Legend;
 
 import javafx.application.Application;
-import javafx.beans.property.ReadOnlyDoubleWrapper;
-import javafx.beans.property.ReadOnlyStringWrapper;
+import javafx.application.Platform;
 import javafx.embed.swing.SwingFXUtils;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
@@ -46,7 +45,9 @@ import javafx.scene.control.TableView;
 import javafx.scene.control.TextArea;
 import javafx.scene.control.TextField;
 import javafx.scene.control.ToggleButton;
+import javafx.scene.control.ToolBar;
 import javafx.scene.control.Tooltip;
+import javafx.scene.image.Image;
 import javafx.scene.image.WritableImage;
 import javafx.scene.input.MouseButton;
 import javafx.scene.layout.BorderPane;
@@ -57,7 +58,9 @@ import javafx.scene.layout.VBox;
 import javafx.stage.FileChooser;
 import javafx.stage.FileChooser.ExtensionFilter;
 import javafx.stage.Stage;
+import javafx.stage.StageStyle;
 
+@SuppressWarnings("restriction")
 public class Main extends Application {
 
 	private BorderPane root;
@@ -67,7 +70,8 @@ public class Main extends Application {
 	private NumberAxis xAxis;
 	private NumberAxis yAxis;
 	private LineChart<Number, Number> ac;
-	
+
+	@SuppressWarnings("rawtypes")
 	private TableView table = new TableView();
 	private List<Double> xValues, fxValues;
 
@@ -76,24 +80,44 @@ public class Main extends Application {
 		initUI(primaryStage);
 	}
 
-	@SuppressWarnings({ "restriction", "rawtypes", "unchecked" })
+	class WindowButtons extends HBox {
+
+		public WindowButtons() {
+			Button closeBtn = new Button("X");
+
+			closeBtn.setOnAction(new EventHandler<ActionEvent>() {
+
+				@Override
+				public void handle(ActionEvent actionEvent) {
+					Platform.exit();
+				}
+			});
+
+			this.getChildren().add(closeBtn);
+		}
+	}
+
+	@SuppressWarnings({ "unchecked" })
 	private void initUI(Stage primaryStage) {
 
 		try {
+
 			xValues = Arrays.asList(0.0);
 			fxValues = Arrays.asList(0.0);
-			
+
 			area = new Area(Area.Type.DEFAULT, "x^3", -5, 5, 10);
 			xAxis = new NumberAxis();
 			yAxis = new NumberAxis();
 			ac = new LineChart<Number, Number>(xAxis, yAxis);
 			ac.setLegendVisible(false);
-			
+
 			area.debug(false);
 
 			primaryStage.setTitle(area.getFunction());
 			primaryStage.setMinHeight(600);
 			primaryStage.setMinWidth(800);
+			primaryStage.setHeight(600);
+			primaryStage.setWidth(800);
 
 			final Menu menu1 = new Menu("File");
 			final Menu menu2 = new Menu("Options");
@@ -103,6 +127,7 @@ public class Main extends Application {
 			MenuItem m3 = new MenuItem("Github");
 
 			MenuItem m4 = new MenuItem("Save image...");
+			MenuItem m5 = new MenuItem("Exit");
 
 			EventHandler<ActionEvent> event = new EventHandler<ActionEvent>() {
 				public void handle(ActionEvent e) {
@@ -112,7 +137,29 @@ public class Main extends Application {
 					alert.setHeaderText("CRAC Information");
 					alert.setContentText(
 							"Written by skavrx (John Monsen)\nWebsite: https://skavrx.com\nContact: contact@skavrx.com\n\nMIT License 2019");
+					Stage stage = (Stage) alert.getDialogPane().getScene().getWindow();
+					stage.getIcons().add(new Image(this.getClass().getResource("icon.png").toString()));
 					alert.showAndWait();
+				}
+			};
+
+			EventHandler<ActionEvent> exitEvent = new EventHandler<ActionEvent>() {
+				public void handle(ActionEvent e) {
+
+					Alert alert = new Alert(AlertType.CONFIRMATION);
+					alert.setTitle("Exit");
+					// alert.setHeaderText("Close Calculator?");
+					alert.setContentText("Are you sure you want exit?");
+					Stage stage = (Stage) alert.getDialogPane().getScene().getWindow();
+					stage.getIcons().add(new Image(this.getClass().getResource("icon.png").toString()));
+					ButtonType okButton = new ButtonType("Yes", ButtonData.YES);
+					ButtonType noButton = new ButtonType("No", ButtonData.NO);
+					alert.getButtonTypes().setAll(okButton, noButton);
+					Optional<ButtonType> result = alert.showAndWait();
+
+					if (result.orElse(noButton) == okButton) {
+						Platform.exit();
+					}
 				}
 			};
 
@@ -126,6 +173,8 @@ public class Main extends Application {
 							"Are you sure you want to go to Github?\n(This will open in your default brower.)");
 					ButtonType okButton = new ButtonType("Yes", ButtonData.YES);
 					ButtonType noButton = new ButtonType("No", ButtonData.NO);
+					Stage stage = (Stage) alert.getDialogPane().getScene().getWindow();
+					stage.getIcons().add(new Image(this.getClass().getResource("icon.png").toString()));
 					alert.getButtonTypes().setAll(okButton, noButton);
 					Optional<ButtonType> result = alert.showAndWait();
 
@@ -159,7 +208,7 @@ public class Main extends Application {
 			Label lbl = new Label("Area");
 			lbl.setAlignment(Pos.BASELINE_CENTER);
 			lbl.setPrefHeight(SIZE);
-			
+
 			lbl.prefWidthProperty().bind(root.widthProperty());
 			lbl.setStyle("-fx-border-style: dotted; -fx-border-width: 1 0 0 0;"
 					+ "-fx-border-color: gray; -fx-font-weight: bold; -fx-font: 24 arial;");
@@ -168,44 +217,53 @@ public class Main extends Application {
 			m1.setOnAction(event);
 			m3.setOnAction(event2);
 			m4.setOnAction(event3);
+			m5.setOnAction(exitEvent);
 
 			// add menu items to menu
 			menu3.getItems().add(m1);
 			menu3.getItems().add(m3);
 
 			menu1.getItems().add(m4);
+			menu1.getItems().add(m5);
 
 			MenuBar menuBar = new MenuBar();
 			menuBar.getMenus().addAll(menu1, menu2, menu3);
 
+			ToolBar toolBar = new ToolBar();
 
-		    table.setEditable(false);
-		    table.setPrefWidth(primaryStage.getMinWidth() * 0.15);
-		    
-		    TableColumn<Integer, Double> xTable = new TableColumn<>("x");
-	        TableColumn<Integer, Double> fxTable = new TableColumn<>("f(x)");
-	        
-	        xTable.setEditable(false);
-	        fxTable.setEditable(false);
+			int height = 25;
+			toolBar.setPrefHeight(height);
+			toolBar.setMinHeight(height);
+			toolBar.setMaxHeight(height);
+			toolBar.getItems().add(new WindowButtons());
 
-	        for (int i = 0; i < xValues.size() && i < fxValues.size(); i++) {
-	            table.getItems().add(i);
-	        }
-	        
-	        xTable.prefWidthProperty().bind(table.widthProperty().multiply(0.5));
-	        fxTable.prefWidthProperty().bind(table.widthProperty().multiply(0.5));
+			table.setEditable(false);
+			table.setPrefWidth(primaryStage.getMinWidth() * 0.15);
 
-	        xTable.setResizable(false);
-	        fxTable.setResizable(false);
-	        
-	        table.getColumns().addAll(xTable, fxTable);
-	        
-	        area.getDataSet();
-	        
+			TableColumn<Integer, Double> xTable = new TableColumn<>("x");
+			TableColumn<Integer, Double> fxTable = new TableColumn<>("f(x)");
+
+			xTable.setEditable(false);
+			fxTable.setEditable(false);
+
+			for (int i = 0; i < xValues.size() && i < fxValues.size(); i++) {
+				table.getItems().add(i);
+			}
+
+			xTable.prefWidthProperty().bind(table.widthProperty().multiply(0.5));
+			fxTable.prefWidthProperty().bind(table.widthProperty().multiply(0.5));
+
+			xTable.setResizable(false);
+			fxTable.setResizable(false);
+
+			table.getColumns().addAll(xTable, fxTable);
+
+			area.getDataSet();
+
 			root.setTop(menuBar);
 			root.setBottom(lbl);
-			//root.setLeft(table);
-			//root.setRight(getRightLabel());
+			// root.setLeft(table);
+			// root.setRight(getRightLabel());
 
 			VBox info = new VBox(5);
 			info.setAlignment(Pos.CENTER_RIGHT);
@@ -231,19 +289,21 @@ public class Main extends Application {
 
 			buttonBoxRectangles.setPadding(new Insets(5));
 			buttonBoxRectangles.setAlignment(Pos.BASELINE_RIGHT);
-			
-			
+
 			updateBox.setPadding(new Insets(5));
 			updateBox.setAlignment(Pos.BASELINE_CENTER);
-			
+
 			areaInfo.setPadding(new Insets(5));
 			areaInfo.setAlignment(Pos.BASELINE_LEFT);
 
-
-			ToggleButton leftBtn = new ToggleButton("Left");
-			ToggleButton rightBtn = new ToggleButton("Right");
-			ToggleButton midBtn = new ToggleButton("Midpoint");
-			ToggleButton shapeBtn = new ToggleButton("Shape");
+			ToggleButton leftBtn = new ToggleButton();
+			leftBtn.setText("Left");
+			ToggleButton rightBtn = new ToggleButton();
+			rightBtn.setText("Right");
+			ToggleButton midBtn = new ToggleButton();
+			midBtn.setText("Midpoint");
+			ToggleButton shapeBtn = new ToggleButton();
+			shapeBtn.setText("Shape");
 
 			Label functionLabel = new Label("Function");
 			TextField functionField = new TextField();
@@ -284,7 +344,7 @@ public class Main extends Application {
 
 			Button setAllButton = new Button("Update All");
 			updateBox.getChildren().addAll(setAllButton);
-			
+
 			info.getChildren().addAll(buttonbox, buttonBoxFunction, buttonBoxLowerBound, buttonBoxUpperBound,
 					buttonBoxRectangles, updateBox);
 			root.setRight(info);
@@ -309,13 +369,16 @@ public class Main extends Application {
 								if (!e.getTarget().toString().toLowerCase().contains(shapeBtn.getText().toLowerCase()))
 									shapeBtn.setSelected(false);
 							}
-						
+
 						selectedMethod.setText("Selected Method: " + area.getType().toString());
 						updateLineChart();
-						lbl.setText("Area: " + area.getArea());
+						lbl.setText("Area: " + area.getArea() + " sq. u.");
 
 					} catch (Exception e2) {
-						new Alert(AlertType.ERROR, "Error with function!").showAndWait();
+						Alert alert = new Alert(AlertType.ERROR, "Error with function!");
+						Stage stage = (Stage) alert.getDialogPane().getScene().getWindow();
+						stage.getIcons().add(new Image(this.getClass().getResource("icon.png").toString()));
+						alert.showAndWait();
 					}
 				}
 			};
@@ -330,11 +393,14 @@ public class Main extends Application {
 					area.resetDataSets();
 					try {
 						area.setFunction(functionField.getText());
-						lbl.setText("Area: " + area.getArea());
+						lbl.setText("Area: " + area.getArea() + " sq. u.");
 						updateLineChart();
 					} catch (Exception e2) {
-						new Alert(AlertType.ERROR, "Error with function!").showAndWait();
-						lowerBoundField.setText(area.getFunction());
+						Alert alert = new Alert(AlertType.ERROR, "Error with function!");
+						Stage stage = (Stage) alert.getDialogPane().getScene().getWindow();
+						stage.getIcons().add(new Image(this.getClass().getResource("icon.png").toString()));
+						alert.showAndWait();
+						functionField.setText(area.getFunction());
 					}
 				}
 			};
@@ -346,10 +412,13 @@ public class Main extends Application {
 					area.resetDataSets();
 					try {
 						area.setLower(Double.valueOf(lowerBoundField.getText()));
-						lbl.setText("Area: " + area.getArea());
+						lbl.setText("Area: " + area.getArea() + " sq. u.");
 						updateLineChart();
 					} catch (Exception e2) {
-						new Alert(AlertType.ERROR, "Must be a number!").showAndWait();
+						Alert alert = new Alert(AlertType.ERROR, "Must be a number!");
+						Stage stage = (Stage) alert.getDialogPane().getScene().getWindow();
+						stage.getIcons().add(new Image(this.getClass().getResource("icon.png").toString()));
+						alert.showAndWait();
 						lowerBoundField.setText(String.valueOf(area.getLower()));
 					}
 				}
@@ -362,10 +431,13 @@ public class Main extends Application {
 					area.resetDataSets();
 					try {
 						area.setUpper(Double.valueOf(upperBoundField.getText()));
-						lbl.setText("Area: " + area.getArea());
+						lbl.setText("Area: " + area.getArea() + " sq. u.");
 						updateLineChart();
 					} catch (Exception e2) {
-						new Alert(AlertType.ERROR, "Must be a number!").showAndWait();
+						Alert alert = new Alert(AlertType.ERROR, "Must be a number!");
+						Stage stage = (Stage) alert.getDialogPane().getScene().getWindow();
+						stage.getIcons().add(new Image(this.getClass().getResource("icon.png").toString()));
+						alert.showAndWait();
 						upperBoundField.setText(String.valueOf(area.getUpper()));
 					}
 				}
@@ -377,18 +449,26 @@ public class Main extends Application {
 				public void handle(ActionEvent e) {
 					area.resetDataSets();
 					try {
-						area.setRect(Integer.valueOf(rectangleField.getText()));
-						lbl.setText("Area: " + area.getArea());
-						updateLineChart();
+						if (Integer.valueOf(rectangleField.getText()) > 100) {
+							new Alert(AlertType.ERROR, "Must be less than 100!").showAndWait();
+							rectangleField.setText(String.valueOf(area.getUpper()));
+						} else {
+							area.setRect(Integer.valueOf(rectangleField.getText()));
+							lbl.setText("Area: " + area.getArea() + " sq. u.");
+							updateLineChart();
+						}
 					} catch (Exception e2) {
-						new Alert(AlertType.ERROR, "Must be a integer!").showAndWait();
+						Alert alert = new Alert(AlertType.ERROR, "Must be an integer!");
+						Stage stage = (Stage) alert.getDialogPane().getScene().getWindow();
+						stage.getIcons().add(new Image(this.getClass().getResource("icon.png").toString()));
+						alert.showAndWait();
 						rectangleField.setText(String.valueOf(area.getUpper()));
 					}
 				}
 			};
 
 			rectangleButton.setOnAction(rectEvent);
-			
+
 			EventHandler<ActionEvent> allEvent = new EventHandler<ActionEvent>() {
 				public void handle(ActionEvent e) {
 					rectEvent.handle(e);
@@ -399,14 +479,17 @@ public class Main extends Application {
 			};
 
 			setAllButton.setOnAction(allEvent);
-			
+
 			updateLineChart();
 
 			Scene scene = new Scene(root, 350, 300);
 			scene.getStylesheets().add(getClass().getResource("chart.css").toExternalForm());
+			
+			primaryStage.initStyle(StageStyle.DECORATED);
 
 			primaryStage.setTitle("CRAC - Calculus Reimann Area Calculator");
 			primaryStage.setScene(scene);
+			primaryStage.getIcons().add(new Image(getClass().getResource("icon.png").toExternalForm()));
 			primaryStage.show();
 
 		} catch (Exception e) {
@@ -415,7 +498,8 @@ public class Main extends Application {
 			alert.setTitle("Exception Dialog");
 			alert.setHeaderText("Oh look, an error.");
 			alert.setContentText(e.getLocalizedMessage());
-
+			Stage stage = (Stage) alert.getDialogPane().getScene().getWindow();
+			stage.getIcons().add(new Image(this.getClass().getResource("icon.png").toString()));
 			// Create expandable Exception.
 			StringWriter sw = new StringWriter();
 			PrintWriter pw = new PrintWriter(sw);
@@ -446,6 +530,7 @@ public class Main extends Application {
 
 	}
 
+	@SuppressWarnings({ "rawtypes", "unchecked" })
 	private LineChart updateLineChart() {
 		ac.getData().clear();
 
@@ -460,7 +545,7 @@ public class Main extends Application {
 			for (Entry<Double, Double> x : area.getDataSet(Type.LEFT).entrySet()) {
 				for (Series x2 : drawRectangleToZero(x.getKey(), x.getValue(), x.getKey() + area.getDelta())) {
 					ac.getData().add(x2);
-			        table.getItems().add(x);
+					table.getItems().add(x);
 				}
 			}
 
@@ -510,24 +595,24 @@ public class Main extends Application {
 
 		touchup.getData().add(new XYChart.Data(area.getLower(), 0));
 		touchup.getData().add(new XYChart.Data(area.getUpper(), 0));
-		
+
 		ac.setTitle("THE AREA CALCULATOR");
 
 		ac.getData().addAll(series1, series2, series3, series4, series5);
 		Legend legend = (Legend) ac.lookup(".chart-legend");
 		AtomicInteger count = new AtomicInteger();
 		legend.getItems().forEach(item -> {
-			if (count.get() == 0) {
+			if (count.get() == 0)
 				item.setText("Left");
-			} else if (count.get() == 1) {
+			else if (count.get() == 1)
 				item.setText("Right");
-			} else if (count.get() == 2) {
+			else if (count.get() == 2)
 				item.setText("Midpoint");
-			} else if (count.get() == 3) {
+			else if (count.get() == 3)
 				item.setText("Function");
-			} else {
+			else
 				item.setText("Remove");
-			}
+
 			count.getAndIncrement();
 		});
 
@@ -562,6 +647,7 @@ public class Main extends Application {
 
 	}
 
+	@SuppressWarnings({ "rawtypes", "unchecked" })
 	public ArrayList<XYChart.Series> drawTrapezoidToZero(double x, double y, double x2, double y2) {
 		ArrayList<XYChart.Series> lines = new ArrayList<XYChart.Series>();
 
@@ -585,6 +671,7 @@ public class Main extends Application {
 		return lines;
 	}
 
+	@SuppressWarnings("rawtypes")
 	public ArrayList<XYChart.Series> drawRectangleToZero(double x, double y, double x2) {
 
 		return drawTrapezoidToZero(x, y, x2, y);
