@@ -57,10 +57,11 @@ import javafx.scene.layout.Priority;
 import javafx.scene.layout.VBox;
 import javafx.stage.FileChooser;
 import javafx.stage.FileChooser.ExtensionFilter;
+import net.objecthunter.exp4j.Expression;
+import net.objecthunter.exp4j.ExpressionBuilder;
 import javafx.stage.Stage;
 import javafx.stage.StageStyle;
 
-@SuppressWarnings("restriction")
 public class Main extends Application {
 
 	private BorderPane root;
@@ -105,7 +106,7 @@ public class Main extends Application {
 			xValues = Arrays.asList(0.0);
 			fxValues = Arrays.asList(0.0);
 
-			area = new Area(Area.Type.DEFAULT, "x^3", -5, 5, 10);
+			area = new Area(Area.Type.DEFAULT, "x^3", "-5", "5", "10");
 			xAxis = new NumberAxis();
 			yAxis = new NumberAxis();
 			ac = new LineChart<Number, Number>(xAxis, yAxis);
@@ -411,7 +412,7 @@ public class Main extends Application {
 				public void handle(ActionEvent e) {
 					area.resetDataSets();
 					try {
-						area.setLower(Double.valueOf(lowerBoundField.getText()));
+						area.setLower(eval(lowerBoundField.getText()));
 						lbl.setText("Area: " + area.getArea() + " sq. u.");
 						updateLineChart();
 					} catch (Exception e2) {
@@ -430,7 +431,7 @@ public class Main extends Application {
 				public void handle(ActionEvent e) {
 					area.resetDataSets();
 					try {
-						area.setUpper(Double.valueOf(upperBoundField.getText()));
+						area.setUpper(eval(upperBoundField.getText()));
 						lbl.setText("Area: " + area.getArea() + " sq. u.");
 						updateLineChart();
 					} catch (Exception e2) {
@@ -449,11 +450,11 @@ public class Main extends Application {
 				public void handle(ActionEvent e) {
 					area.resetDataSets();
 					try {
-						if (Integer.valueOf(rectangleField.getText()) > 100) {
+						if (eval(rectangleField.getText()) > 100) {
 							new Alert(AlertType.ERROR, "Must be less than 100!").showAndWait();
 							rectangleField.setText(String.valueOf(area.getUpper()));
 						} else {
-							area.setRect(Integer.valueOf(rectangleField.getText()));
+							area.setRect((int) Math.round(eval(rectangleField.getText())));
 							lbl.setText("Area: " + area.getArea() + " sq. u.");
 							updateLineChart();
 						}
@@ -680,6 +681,18 @@ public class Main extends Application {
 
 	public static void main(String[] args) {
 		launch(args);
+	}
+	
+	/**
+	 * Uses exp4j to parse the function as a string
+	 * 
+	 * @param function String of the function which will include x
+	 * 
+	 * @return the evaluated value of the function with variable x
+	 */
+	private double eval(String function) {
+		Expression e = new ExpressionBuilder(function).build();
+		return e.evaluate();
 	}
 
 }

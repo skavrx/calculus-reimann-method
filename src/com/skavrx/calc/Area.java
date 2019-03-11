@@ -10,7 +10,7 @@ import net.objecthunter.exp4j.ExpressionBuilder;
  * Utility class for the area under a function
  * 
  * @see Area()
- * @version 0.2
+ * @version 0.3
  * @author skavrx
  *
  */
@@ -53,18 +53,18 @@ public class Area {
 	 *                             bound or the lower bound is greater than the
 	 *                             upper bound.
 	 */
-	public Area(Type type, String function, double lower, double upper, int rect) {
+	public Area(Type type, String function, String lower, String upper, String rect) {
 		// Setting class variables
 		this.type = type;
 		this.setFunction(function);
 		// Checking the upper and lower bounds don't conflict
-		if (upper < lower)
+		if (eval(upper) < eval(lower))
 			throw new ArithmeticException("Upper bound cannot be less than lower bound!");
-		else if (lower > upper)
+		else if (eval(lower) > eval(upper))
 			throw new ArithmeticException("Lower bound cannot be more than upper bound!");
-		this.setLower(lower);
-		this.setUpper(upper);
-		this.setRect(rect);
+		this.setLower(eval(lower));
+		this.setUpper(eval(upper));
+		this.setRect((int) Math.round(eval(rect)));
 	}
 
 	/**
@@ -500,6 +500,18 @@ public class Area {
 		return eval(function, x);
 	}
 
+	/**
+	 * Uses exp4j to parse the function as a string
+	 * 
+	 * @param function String of the function which will include x
+	 * 
+	 * @return the evaluated value of the function with variable x
+	 */
+	private double eval(String function) {
+		Expression e = new ExpressionBuilder(function).build();
+		return e.evaluate();
+	}
+	
 	/**
 	 * The area type for when different methods are being used for finding the area.
 	 * 
