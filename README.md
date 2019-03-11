@@ -12,7 +12,7 @@ Install java runtime environment to your machine. [Java Installer](https://www.j
 
 ### Download and run program
 
-1. Go to the releases page [Releases](releases)
+1. Go to the releases page [Releases](https://github.com/skavrx/calculus-reimann-method/releases)
 1. Download the latest jar release
 1. Open Command Prompt and open the directory where the jar is
 1. Run 
