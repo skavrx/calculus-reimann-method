@@ -319,12 +319,12 @@ public class Area {
 			if (DEBUG)
 				System.out.println("Rectangle: " + rec_num + " " + "Current: x: " + x + " y: " + eval(function, x));
 
-			dataSetLeft.put(x, eval(function, x));
 			if (DEBUG)
 				System.out.println(String.format("Data Point Added: (%.2f, %.2f)", x, eval(function, x)));
 			// add the delta (length) multiplied by the evaluated x value from the given
 			// function (height) which is the area of the rectangle.
 			area += Math.abs((delta * eval(function, x)));
+			dataSetLeft.put(x, eval(function, x));
 			if (DEBUG)
 				rec_num++;
 		}
@@ -345,9 +345,9 @@ public class Area {
 		double domain = upper - lower; // Getting the domain by subtracting the upper bound by the lower bound.
 		double delta = domain / rect; // The distance between the rectangles determined by dividing the domain by
 										// the number of rectangles
-
+		
 		dataSetRight = new HashMap<Double, Double>();
-
+		
 		double area = 0; // Temporary area variable which is returned
 		int rec_num = 1; // Debug test num
 
@@ -359,7 +359,6 @@ public class Area {
 			// add the delta (length) multiplied by the evaluated x value from the given
 			// function (height) which is the area of the rectangle.
 			dataSetRight.put(x, eval(function, x));
-
 			area += Math.abs((delta * eval(function, x)));
 			if (DEBUG)
 				rec_num++;
@@ -417,8 +416,8 @@ public class Area {
 		double delta = domain / rect; // The distance between the rectangles determined by dividing the domain by
 										// the number of rectangles
 
-		dataSetShape = new HashMap<Double, Double>();
-
+		dataSetShape = new HashMap<Double, Double>();	
+		
 		double area = 0; // Temporary area variable which is returned
 		int rec_num = 1; // Debug test num
 

@@ -5,8 +5,6 @@ import java.io.IOException;
 import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
 import java.util.Map.Entry;
 import java.util.Optional;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -30,6 +28,7 @@ import javafx.scene.SnapshotParameters;
 import javafx.scene.chart.LineChart;
 import javafx.scene.chart.NumberAxis;
 import javafx.scene.chart.XYChart;
+import javafx.scene.chart.XYChart.Data;
 import javafx.scene.chart.XYChart.Series;
 import javafx.scene.control.Alert;
 import javafx.scene.control.Alert.AlertType;
@@ -40,12 +39,9 @@ import javafx.scene.control.Label;
 import javafx.scene.control.Menu;
 import javafx.scene.control.MenuBar;
 import javafx.scene.control.MenuItem;
-import javafx.scene.control.TableColumn;
-import javafx.scene.control.TableView;
 import javafx.scene.control.TextArea;
 import javafx.scene.control.TextField;
 import javafx.scene.control.ToggleButton;
-import javafx.scene.control.ToolBar;
 import javafx.scene.control.Tooltip;
 import javafx.scene.image.Image;
 import javafx.scene.image.WritableImage;
@@ -57,82 +53,87 @@ import javafx.scene.layout.Priority;
 import javafx.scene.layout.VBox;
 import javafx.stage.FileChooser;
 import javafx.stage.FileChooser.ExtensionFilter;
-import net.objecthunter.exp4j.Expression;
-import net.objecthunter.exp4j.ExpressionBuilder;
 import javafx.stage.Stage;
 import javafx.stage.StageStyle;
+import net.objecthunter.exp4j.Expression;
+import net.objecthunter.exp4j.ExpressionBuilder;
 
+/**
+ * Main class for the application
+ * 
+ * @author skavrx
+ *
+ */
 public class Main extends Application {
 
+	// Defining the variables so that they can be used in different methods in the
+	// class
 	private BorderPane root;
+	// Area label font size
 	private final int SIZE = 60;
+	// My utility class for defining the area of the function
 	private Area area;
 
+	// the xAxis object for the line chart
 	private NumberAxis xAxis;
 	private NumberAxis yAxis;
 	private LineChart<Number, Number> ac;
 
-	@SuppressWarnings("rawtypes")
-	private TableView table = new TableView();
-	private List<Double> xValues, fxValues;
-
+	// This method is what gets run when the application starts
 	@Override
 	public void start(Stage primaryStage) {
 		initUI(primaryStage);
 	}
 
-	class WindowButtons extends HBox {
-
-		public WindowButtons() {
-			Button closeBtn = new Button("X");
-
-			closeBtn.setOnAction(new EventHandler<ActionEvent>() {
-
-				@Override
-				public void handle(ActionEvent actionEvent) {
-					Platform.exit();
-				}
-			});
-
-			this.getChildren().add(closeBtn);
-		}
-	}
-
-	@SuppressWarnings({ "unchecked" })
+	/**
+	 * The initialization of the UI (I also dumped like everything else in here to
+	 * no confuse myself.
+	 * 
+	 * @param primaryStage default
+	 */
 	private void initUI(Stage primaryStage) {
 
+		// Try catch method so if there is any error starting up, a dialogue pops up
 		try {
-
-			xValues = Arrays.asList(0.0);
-			fxValues = Arrays.asList(0.0);
-
+			// Using my utility class to define a default function that will be shown when
+			// the UI initializes
 			area = new Area(Area.Type.DEFAULT, "x^3", "-5", "5", "10");
+			root = new BorderPane();
+
+			// Initializing the objects for the UI
 			xAxis = new NumberAxis();
 			yAxis = new NumberAxis();
+
 			ac = new LineChart<Number, Number>(xAxis, yAxis);
 			ac.setLegendVisible(false);
+			ac.setCreateSymbols(false);
 
+			// Setting debug to false to prevent any debugging messages from appearing
 			area.debug(false);
 
+			// Setting the defaults for the state such as the title that will be displayed
+			// along with the default height and width and the minimum size that it can be
+			// resized to
 			primaryStage.setTitle(area.getFunction());
 			primaryStage.setMinHeight(600);
 			primaryStage.setMinWidth(800);
 			primaryStage.setHeight(600);
 			primaryStage.setWidth(800);
 
+			// Defining menu options for the menu bar
 			final Menu menu1 = new Menu("File");
-			final Menu menu2 = new Menu("Options");
 			final Menu menu3 = new Menu("Help");
 
+			// Defining menu items for each of the menus on the menu bar
 			MenuItem m1 = new MenuItem("Info");
 			MenuItem m3 = new MenuItem("Github");
 
 			MenuItem m4 = new MenuItem("Save image...");
 			MenuItem m5 = new MenuItem("Exit");
 
+			// defining an event for the information button
 			EventHandler<ActionEvent> event = new EventHandler<ActionEvent>() {
 				public void handle(ActionEvent e) {
-
 					Alert alert = new Alert(AlertType.INFORMATION);
 					alert.setTitle("CRAC Information");
 					alert.setHeaderText("CRAC Information");
@@ -144,6 +145,7 @@ public class Main extends Application {
 				}
 			};
 
+			// defining an event for the exit button under file
 			EventHandler<ActionEvent> exitEvent = new EventHandler<ActionEvent>() {
 				public void handle(ActionEvent e) {
 
@@ -164,6 +166,7 @@ public class Main extends Application {
 				}
 			};
 
+			// defining an event for the github button
 			EventHandler<ActionEvent> event2 = new EventHandler<ActionEvent>() {
 				public void handle(ActionEvent e) {
 
@@ -185,6 +188,7 @@ public class Main extends Application {
 				}
 			};
 
+			// defining the event for the save graph as image button
 			EventHandler<ActionEvent> event3 = new EventHandler<ActionEvent>() {
 				public void handle(ActionEvent e1) {
 
@@ -204,8 +208,8 @@ public class Main extends Application {
 					}
 				}
 			};
-			root = new BorderPane();
 
+			// Defining the label for the bottom of the borderpane
 			Label lbl = new Label("Area");
 			lbl.setAlignment(Pos.BASELINE_CENTER);
 			lbl.setPrefHeight(SIZE);
@@ -214,7 +218,7 @@ public class Main extends Application {
 			lbl.setStyle("-fx-border-style: dotted; -fx-border-width: 1 0 0 0;"
 					+ "-fx-border-color: gray; -fx-font-weight: bold; -fx-font: 24 arial;");
 
-			// add event
+			// add events to the buttons
 			m1.setOnAction(event);
 			m3.setOnAction(event2);
 			m4.setOnAction(event3);
@@ -228,46 +232,17 @@ public class Main extends Application {
 			menu1.getItems().add(m5);
 
 			MenuBar menuBar = new MenuBar();
-			menuBar.getMenus().addAll(menu1, menu2, menu3);
+			menuBar.getMenus().addAll(menu1, menu3);
 
-			ToolBar toolBar = new ToolBar();
-
-			int height = 25;
-			toolBar.setPrefHeight(height);
-			toolBar.setMinHeight(height);
-			toolBar.setMaxHeight(height);
-			toolBar.getItems().add(new WindowButtons());
-
-			table.setEditable(false);
-			table.setPrefWidth(primaryStage.getMinWidth() * 0.15);
-
-			TableColumn<Integer, Double> xTable = new TableColumn<>("x");
-			TableColumn<Integer, Double> fxTable = new TableColumn<>("f(x)");
-
-			xTable.setEditable(false);
-			fxTable.setEditable(false);
-
-			for (int i = 0; i < xValues.size() && i < fxValues.size(); i++) {
-				table.getItems().add(i);
-			}
-
-			xTable.prefWidthProperty().bind(table.widthProperty().multiply(0.5));
-			fxTable.prefWidthProperty().bind(table.widthProperty().multiply(0.5));
-
-			xTable.setResizable(false);
-			fxTable.setResizable(false);
-
-			table.getColumns().addAll(xTable, fxTable);
-
-			area.getDataSet();
-
+			// Adding the menu bar and the label to the root pane
 			root.setTop(menuBar);
 			root.setBottom(lbl);
-			// root.setLeft(table);
-			// root.setRight(getRightLabel());
 
+			// Creating a box for the buttons and input boxes to go into
 			VBox info = new VBox(5);
 			info.setAlignment(Pos.CENTER_RIGHT);
+
+			// defining the horizontal boxes to be put into the vertical box
 			HBox buttonbox = new HBox(5);
 			HBox buttonBoxFunction = new HBox(5);
 			HBox buttonBoxLowerBound = new HBox(5);
@@ -276,6 +251,7 @@ public class Main extends Application {
 			HBox areaInfo = new HBox(5);
 			HBox updateBox = new HBox(5);
 
+			// Setting the boxes alignment in the border pane and adding padding
 			buttonbox.setPadding(new Insets(5));
 			buttonbox.setAlignment(Pos.BASELINE_CENTER);
 
@@ -297,6 +273,7 @@ public class Main extends Application {
 			areaInfo.setPadding(new Insets(5));
 			areaInfo.setAlignment(Pos.BASELINE_LEFT);
 
+			// Creating the buttons for the methods
 			ToggleButton leftBtn = new ToggleButton();
 			leftBtn.setText("Left");
 			ToggleButton rightBtn = new ToggleButton();
@@ -306,6 +283,7 @@ public class Main extends Application {
 			ToggleButton shapeBtn = new ToggleButton();
 			shapeBtn.setText("Shape");
 
+			// The function input box
 			Label functionLabel = new Label("Function");
 			TextField functionField = new TextField();
 			functionField.setText(area.getFunction());
@@ -313,6 +291,7 @@ public class Main extends Application {
 			functionField.setTooltip(new Tooltip("Use x as the variable"));
 			Button functionButton = new Button("Set");
 
+			// Lower bound input box
 			Label lowerBoundLabel = new Label("Lower Bound");
 			TextField lowerBoundField = new TextField();
 			lowerBoundField.setText(String.valueOf(area.getLower()));
@@ -320,6 +299,7 @@ public class Main extends Application {
 			lowerBoundField.setTooltip(new Tooltip("Cannot be greater than upper bound"));
 			Button lowerBoundButton = new Button("Set");
 
+			// Upper bound input box
 			Label upperBoundLabel = new Label("Upper Bound");
 			TextField upperBoundField = new TextField();
 			upperBoundField.setText(String.valueOf(area.getUpper()));
@@ -327,6 +307,7 @@ public class Main extends Application {
 			upperBoundField.setTooltip(new Tooltip("Cannot be lower than lower bound"));
 			Button upperBoundButton = new Button("Set");
 
+			// Rectangles input box
 			Label rectangleLabel = new Label("Rectangles");
 			TextField rectangleField = new TextField();
 			rectangleField.setText(String.valueOf(area.getRect()));
@@ -334,23 +315,31 @@ public class Main extends Application {
 			rectangleField.setTooltip(new Tooltip("Must be a whole number"));
 			Button rectangleButton = new Button("Set");
 
+			// adding all the buttons, labels and inputs to the boxes
 			buttonbox.getChildren().addAll(leftBtn, rightBtn, midBtn, shapeBtn);
 			buttonBoxFunction.getChildren().addAll(functionLabel, functionField, functionButton);
 			buttonBoxLowerBound.getChildren().addAll(lowerBoundLabel, lowerBoundField, lowerBoundButton);
 			buttonBoxUpperBound.getChildren().addAll(upperBoundLabel, upperBoundField, upperBoundButton);
 			buttonBoxRectangles.getChildren().addAll(rectangleLabel, rectangleField, rectangleButton);
 
-			Label selectedMethod = new Label("Selected Method: " + area.getType().toString());
-			areaInfo.getChildren().addAll(selectedMethod);
+			// Label selectedMethod = new Label("Selected Method: " +
+			// area.getType().toString());
+			// areaInfo.getChildren().addAll(selectedMethod);
 
+			// adding the button boxes to the root box
 			Button setAllButton = new Button("Update All");
 			updateBox.getChildren().addAll(setAllButton);
 
 			info.getChildren().addAll(buttonbox, buttonBoxFunction, buttonBoxLowerBound, buttonBoxUpperBound,
 					buttonBoxRectangles, updateBox);
+
+			// setting the righthand borderpane to the info box
 			root.setRight(info);
+
+			// setting the center box to the linechart object
 			root.setCenter(ac);
 
+			// the event for when the method button is pushed
 			EventHandler<ActionEvent> selectionEvent = new EventHandler<ActionEvent>() {
 				public void handle(ActionEvent e) {
 					area.resetDataSets();
@@ -371,12 +360,12 @@ public class Main extends Application {
 									shapeBtn.setSelected(false);
 							}
 
-						selectedMethod.setText("Selected Method: " + area.getType().toString());
 						updateLineChart();
 						lbl.setText("Area: " + area.getArea() + " sq. u.");
 
 					} catch (Exception e2) {
 						Alert alert = new Alert(AlertType.ERROR, "Error with function!");
+						e2.printStackTrace();
 						Stage stage = (Stage) alert.getDialogPane().getScene().getWindow();
 						stage.getIcons().add(new Image(this.getClass().getResource("icon.png").toString()));
 						alert.showAndWait();
@@ -384,11 +373,13 @@ public class Main extends Application {
 				}
 			};
 
+			// setting the event for the buttons
 			leftBtn.setOnAction(selectionEvent);
 			rightBtn.setOnAction(selectionEvent);
 			midBtn.setOnAction(selectionEvent);
 			shapeBtn.setOnAction(selectionEvent);
 
+			// the event for the function input box
 			EventHandler<ActionEvent> functionEvent = new EventHandler<ActionEvent>() {
 				public void handle(ActionEvent e) {
 					area.resetDataSets();
@@ -398,6 +389,7 @@ public class Main extends Application {
 						updateLineChart();
 					} catch (Exception e2) {
 						Alert alert = new Alert(AlertType.ERROR, "Error with function!");
+						e2.printStackTrace();
 						Stage stage = (Stage) alert.getDialogPane().getScene().getWindow();
 						stage.getIcons().add(new Image(this.getClass().getResource("icon.png").toString()));
 						alert.showAndWait();
@@ -408,6 +400,7 @@ public class Main extends Application {
 
 			functionButton.setOnAction(functionEvent);
 
+			// the event for the lower input box
 			EventHandler<ActionEvent> lowerEvent = new EventHandler<ActionEvent>() {
 				public void handle(ActionEvent e) {
 					area.resetDataSets();
@@ -417,6 +410,7 @@ public class Main extends Application {
 						updateLineChart();
 					} catch (Exception e2) {
 						Alert alert = new Alert(AlertType.ERROR, "Must be a number!");
+						e2.printStackTrace();
 						Stage stage = (Stage) alert.getDialogPane().getScene().getWindow();
 						stage.getIcons().add(new Image(this.getClass().getResource("icon.png").toString()));
 						alert.showAndWait();
@@ -427,6 +421,7 @@ public class Main extends Application {
 
 			lowerBoundButton.setOnAction(lowerEvent);
 
+			// the event for the upper input box
 			EventHandler<ActionEvent> upperEvent = new EventHandler<ActionEvent>() {
 				public void handle(ActionEvent e) {
 					area.resetDataSets();
@@ -436,6 +431,7 @@ public class Main extends Application {
 						updateLineChart();
 					} catch (Exception e2) {
 						Alert alert = new Alert(AlertType.ERROR, "Must be a number!");
+						e2.printStackTrace();
 						Stage stage = (Stage) alert.getDialogPane().getScene().getWindow();
 						stage.getIcons().add(new Image(this.getClass().getResource("icon.png").toString()));
 						alert.showAndWait();
@@ -446,6 +442,7 @@ public class Main extends Application {
 
 			upperBoundButton.setOnAction(upperEvent);
 
+			// the event for the rectangle input box
 			EventHandler<ActionEvent> rectEvent = new EventHandler<ActionEvent>() {
 				public void handle(ActionEvent e) {
 					area.resetDataSets();
@@ -460,6 +457,7 @@ public class Main extends Application {
 						}
 					} catch (Exception e2) {
 						Alert alert = new Alert(AlertType.ERROR, "Must be an integer!");
+						e2.printStackTrace();
 						Stage stage = (Stage) alert.getDialogPane().getScene().getWindow();
 						stage.getIcons().add(new Image(this.getClass().getResource("icon.png").toString()));
 						alert.showAndWait();
@@ -470,6 +468,7 @@ public class Main extends Application {
 
 			rectangleButton.setOnAction(rectEvent);
 
+			// the update all button which calls all the events for each of the buttons
 			EventHandler<ActionEvent> allEvent = new EventHandler<ActionEvent>() {
 				public void handle(ActionEvent e) {
 					rectEvent.handle(e);
@@ -481,20 +480,28 @@ public class Main extends Application {
 
 			setAllButton.setOnAction(allEvent);
 
+			// update the line chart
 			updateLineChart();
 
+			// defining the scene using the root borderpane
 			Scene scene = new Scene(root, 350, 300);
+
+			// setting the styling class
 			scene.getStylesheets().add(getClass().getResource("chart.css").toExternalForm());
-			
+
 			primaryStage.initStyle(StageStyle.DECORATED);
 
 			primaryStage.setTitle("CRAC - Calculus Reimann Area Calculator");
 			primaryStage.setScene(scene);
+
+			// set the icon and show the scene
 			primaryStage.getIcons().add(new Image(getClass().getResource("icon.png").toExternalForm()));
 			primaryStage.show();
 
 		} catch (Exception e) {
 
+			// if an error happens while launching the javafx app, show an alert dialogue
+			// with the error
 			Alert alert = new Alert(AlertType.ERROR);
 			alert.setTitle("Exception Dialog");
 			alert.setHeaderText("Oh look, an error.");
@@ -531,6 +538,12 @@ public class Main extends Application {
 
 	}
 
+	/**
+	 * Updates the line chart by clear the data on it and generating the new points
+	 * on it for the select type
+	 * 
+	 * @return the line chart with the updated points
+	 */
 	@SuppressWarnings({ "rawtypes", "unchecked" })
 	private LineChart updateLineChart() {
 		ac.getData().clear();
@@ -546,7 +559,6 @@ public class Main extends Application {
 			for (Entry<Double, Double> x : area.getDataSet(Type.LEFT).entrySet()) {
 				for (Series x2 : drawRectangleToZero(x.getKey(), x.getValue(), x.getKey() + area.getDelta())) {
 					ac.getData().add(x2);
-					table.getItems().add(x);
 				}
 			}
 
@@ -589,9 +601,12 @@ public class Main extends Application {
 
 		XYChart.Series series4 = new XYChart.Series();
 		series4.setName("Function");
-		for (Entry<Double, Double> ne : area.getDataSet(Type.FUNCTION).entrySet())
-			series4.getData().add(new XYChart.Data(ne.getKey(), ne.getValue()));
-
+		for (Entry<Double, Double> ne : area.getDataSet(Type.FUNCTION).entrySet()) {
+			Data aa = new XYChart.Data(ne.getKey(), ne.getValue());
+			// Node lineSymbol1 = aa.getNode().lookup(".chart-line-symbol");
+			// lineSymbol1.setStyle("-fx-background-color: transparent, transparent;");
+			series4.getData().add(aa);
+		}
 		XYChart.Series touchup = new XYChart.Series();
 
 		touchup.getData().add(new XYChart.Data(area.getLower(), 0));
@@ -644,10 +659,20 @@ public class Main extends Application {
 				}
 			}
 		}
+
 		return ac;
 
 	}
 
+	/**
+	 * Gets the list of points that will generate a box by the given parameters
+	 * 
+	 * @param x  the x value
+	 * @param y  the y value for the first x
+	 * @param x2 the second x value
+	 * @param y2 the y value of the second x
+	 * @return an ArrayList of XYChart Series data points to be added to a chart
+	 */
 	@SuppressWarnings({ "rawtypes", "unchecked" })
 	public ArrayList<XYChart.Series> drawTrapezoidToZero(double x, double y, double x2, double y2) {
 		ArrayList<XYChart.Series> lines = new ArrayList<XYChart.Series>();
@@ -656,14 +681,23 @@ public class Main extends Application {
 		XYChart.Series line2 = new XYChart.Series();
 		XYChart.Series line3 = new XYChart.Series();
 
-		line1.getData().add(new XYChart.Data(x, 0));
-		line1.getData().add(new XYChart.Data(x, y));
+		Data point1 = new XYChart.Data(x, 0);
+		Data point2 = new XYChart.Data(x, y);
 
-		line2.getData().add(new XYChart.Data(x, y));
-		line2.getData().add(new XYChart.Data(x2, y2));
+		line1.getData().add(point1);
+		line1.getData().add(point2);
 
-		line3.getData().add(new XYChart.Data(x2, y2));
-		line3.getData().add(new XYChart.Data(x2, 0));
+		Data point3 = new XYChart.Data(x, y);
+		Data point4 = new XYChart.Data(x2, y2);
+
+		line2.getData().add(point3);
+		line2.getData().add(point4);
+
+		Data point5 = new XYChart.Data(x2, y2);
+		Data point6 = new XYChart.Data(x2, 0);
+
+		line3.getData().add(point5);
+		line3.getData().add(point6);
 
 		lines.add(line1);
 		lines.add(line2);
@@ -672,6 +706,14 @@ public class Main extends Application {
 		return lines;
 	}
 
+	/**
+	 * draws a rectangle instead of a trapezoid with less arguments
+	 * 
+	 * @param x  the x value
+	 * @param y  the y value
+	 * @param x2 the second x value
+	 * @return an ArrayList of XYChart Series data points to be added to a chart
+	 */
 	@SuppressWarnings("rawtypes")
 	public ArrayList<XYChart.Series> drawRectangleToZero(double x, double y, double x2) {
 
@@ -679,10 +721,15 @@ public class Main extends Application {
 
 	}
 
+	/**
+	 * Main method for the program, launches the JavaFX UI
+	 * 
+	 * @param args
+	 */
 	public static void main(String[] args) {
 		launch(args);
 	}
-	
+
 	/**
 	 * Uses exp4j to parse the function as a string
 	 * 

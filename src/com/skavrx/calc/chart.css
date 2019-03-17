@@ -7,33 +7,6 @@
 .default-color1.chart-series-line { -fx-stroke: green; }
 .default-color1.chart-series-line { -fx-stroke: orange; }
 
-.default-color0.chart-line-symbol { 
-    -fx-background-color: transparent, transparent; 
-}
-
-.chart-alternative-row-fill {
-    -fx-fill: transparent;
-    -fx-stroke: transparent;
-    -fx-stroke-width: 0;
-}
-
-.chart-line-symbol { 
-    -fx-background-color: transparent, transparent; 
-}
-
-.default-color0.chart-legend-item-symbol{
-    -fx-background-color: red;
- }
-.default-color1.chart-legend-item-symbol{
-    -fx-background-color: blue;
-}
-.default-color2.chart-legend-item-symbol{
-    -fx-background-color: green;
-}
-.default-color3.chart-legend-item-symbol{
-    -fx-background-color: orange;
-}
-
 .menu-item .label {
     -fx-text-fill: white;
 }
